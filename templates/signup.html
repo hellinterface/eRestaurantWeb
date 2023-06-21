@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename= 'css/style_desktop.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename= 'css/style_auth.css') }}">
+    <title>eRestaurantWeb</title>
+</head>
+
+<body>
+    <header>
+        <div id="headerLogo">eRestaurant</div>
+    </header>
+    <a href="/login">Войти</a>
+    <div id="userFormContainer">
+        {% if error == True %}
+            {% block content %}
+            <div class="errorMessage">Не удалось создать пользователя.</div>
+            {% endblock content %}
+        {% endif %}
+        <form method="post">
+            <div>
+                <label for="username">Имя пользователя</label>
+                <input type="text" name="username" required="true" minlength="3" placeholder="Имя пользователя" value="{{ request.form['username'] }}"></input>
+            </div>
+            <div>
+                <label for="password">Пароль</label>
+                <input type="password" name="password" required="true" minlength="3" placeholder="Пароль" value="{{ request.form['password'] }}"></input>
+            </div>
+            <div>
+                <label for="name">Имя</label>
+                <input type="text" name="name" required="true" minlength="3" placeholder="Имя" value="{{ request.form['surname'] }}"></input>
+            </div>
+            <div>
+                <label for="surname">Фамилия</label>
+                <input type="text" name="surname" required="true" minlength="3" placeholder="Фамилия" value="{{ request.form['password'] }}"></input>
+            </div>
+            <div>
+                <button type="submit">Создать аккаунт</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div id="entries_list">
+    <div class="entries_entryContainer">
+        <div class="row">
+            <div class="entries_entryDate">Дата</div>
+            <div class="entries_entryDate">23.05.2023</div>
+        </div>
+        <div class="row">
+            <div class="entries_entryTime">Время</div>
+            <div class="entries_entryTime">16:00 - 17:00</div>
+        </div>
+        <div class="row">
+            <div class="entries_entryTable">Место</div>
+            <div class="entries_entryTable">Столик 6 (3 чел.)</div>
+        </div>
+    </div>
+    
+    {% for entry in entries %}
+    <div class="entries_entryContainer" data-timestart="{{ entry['TimeStart'] }}" data-timeend="{{ entry['TimeEnd'] }}" >
+        <div class="row">
+            <div class="entries_entryDate">Дата</div>
+            <div class="entries_entryDate">{{ entry['TimeStart'] }} - {{ entry['TimeEnd'] }}</div>
+        </div>
+        <div class="row">
+            <div class="entries_entryTime">Время</div>
+            <div class="entries_entryTime">{{ entry['TimeStart'] }} - {{ entry['TimeEnd'] }}</div>
+        </div>
+        <div class="row">
+            <div class="entries_entryTable">Место</div>
+            <div class="entries_entryTable">Столик {{ entry['TableID'] }} ({{ entry['PeopleCount'] }} чел.)</div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+<div class="fab">
+    <a href="/new">+</a>
+</div>
+{% endblock %}

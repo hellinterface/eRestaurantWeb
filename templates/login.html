@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename= 'css/style_desktop.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename= 'css/style_auth.css') }}">
+    <title>eRestaurantWeb</title>
+</head>
+
+<body>
+    <header>
+        <div id="headerLogo">eRestaurant</div>
+    </header>
+    <div id="userFormContainer">
+        {% if error == True %}
+            {% block content %}
+            <div class="errorMessage">Неверное имя пользователя или пароль.</div>
+            {% endblock content %}
+        {% endif %}
+        <form method="post">
+            <div>
+                <label for="username">Имя пользователя</label>
+                <input type="text" name="username" required="true" placeholder="Имя пользователя" value="{{ request.form['username'] }}"></input>
+            </div>
+            <div>
+                <label for="title">Пароль</label>
+                <input type="password" name="password" required="true" placeholder="Пароль" value="{{ request.form['password'] }}"></input>
+            </div>
+            <div>
+                <button type="submit">Войти</button>
+            </div>
+        </form>
+    </div>
+    <a href="/signup">Создать аккаунт</a>
+</body>
+</html>

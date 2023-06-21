@@ -1,0 +1,26 @@
+
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#userFormContainer {
+    width: 400px;
+    background: #eee;
+    padding: 16px;
+    border-radius: 6px;
+}
+
+#userFormContainer form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+#userFormContainer form div {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}

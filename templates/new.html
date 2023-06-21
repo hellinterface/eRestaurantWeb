@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div id="newEntry_container">
+    <div id="newEntry_left">
+        <h1>Столики</h1>
+        <div id="newEntry_tableGrid">
+            <div class="newEntry_tableGridDecoration">
+                <div class="newEntry_tableGridDecorationInner"></div>
+            </div>
+            {% for table in tables %}
+            <div class="newEntry_tableCard" data-tableid="{{ table['ID'] }}">
+                <h2>Столик {{ table['ID'] }}</h2>
+                <h3>Мест: {{ table['Seats'] }}</h3>
+            </div>
+            {% endfor %}
+        </div>
+        <h1>Кухни</h1>
+        <div id="newEntry_cuisineList">
+            {% for cuisine in cuisines %}
+            <div class="newEntry_cuisineCard">
+                <h2>{{ cuisine['Name'] }}</h2>
+                <h3>{{ cuisine['Description'] }}</h3>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <div id="newEntry_right">
+        <input type="date" id="newEntry_dateInput" value="2023-07-04" min="2023-07-04" max="2023-08-04">
+        <button id="newEntry_submitButton">Создать запись</button>
+    </div>
+</div>
+<script src="{{ url_for('static', filename= 'js/script_new.js') }}"></script>
+{% endblock %}
