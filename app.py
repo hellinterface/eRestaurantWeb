@@ -2,16 +2,11 @@ import sqlite3
 from flask import Flask, render_template, make_response, request, redirect, Response, abort
 import string
 import random
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 
-sessionKeys = dict(shit="fuck123")
-
-{
-    "username": "ajnuagjuaghjuagnh",
-    "username2": "gssggsgs",
-    "username3": "ajnuagjuaghjgsgsguagnh",
-    "username4": "ajnuagjuaghjgsgsgsuagnh",
-    "username5": "ajnuagjuaghjgsgsuagnh",
-}
+# ключ: имя пользователя
+sessionKeys = dict()
 
 def get_db_connection():
     conn = sqlite3.connect('main.db')
@@ -25,17 +20,16 @@ def root():
     userKey = request.cookies.get('sessionkey')
     print(userKey)
     print(sessionKeys.values())
-    if userKey not in list(sessionKeys.values()) :
+    if userKey not in list(sessionKeys.keys()) :
         return redirect('/login')
-    currentUsername = ""
-    for username, sessionkey in sessionKeys.items():
-        if sessionkey == userKey:
-            currentUsername = username
+    currentUsername = sessionKeys[userKey]
+
     conn = get_db_connection()
-    user = conn.execute('SELECT * FROM users WHERE Username = ' + currentUsername).fetchone()
+    user = conn.execute('SELECT * FROM Users WHERE Username = ' + currentUsername).fetchone()
     entries = conn.execute('SELECT * FROM entries WHERE UsernameID = ' + str(user['ID'])).fetchall()
     conn.close()
-    resp = make_response(render_template('entries.html', entries=entries))
+    namesurname = user['Name'] + " " + user['Surname']
+    resp = make_response(render_template('entries.html', namesurname=namesurname, entries=entries))
     # resp.headers['AuthKey'] = '*'
     return resp
 
@@ -45,13 +39,19 @@ def new():
     userKey = request.cookies.get('sessionkey')
     print(userKey)
     print(sessionKeys.values())
-    if userKey not in list(sessionKeys.values()) :
+    if userKey not in list(sessionKeys.keys()) :
         return redirect('/login')
+    currentUsername = sessionKeys[userKey]
+
     conn = get_db_connection()
+    user = conn.execute('SELECT * FROM Users WHERE Username = ' + currentUsername).fetchone()
     tables = conn.execute('SELECT * FROM tables').fetchall()
     cuisines = conn.execute('SELECT * FROM cuisines').fetchall()
     conn.close()
-    resp = make_response(render_template('new.html', tables=tables, cuisines=cuisines))
+    namesurname = user['Name'] + " " + user['Surname']
+    minDate = datetime.today().strftime('%Y-%m-%d')
+    maxDate = (datetime.today() + relativedelta(months=1)).strftime('%Y-%m-%d')
+    resp = make_response(render_template('new.html', namesurname=namesurname, tables=tables, cuisines=cuisines, minDate=minDate, maxDate=maxDate))
     # resp.headers['AuthKey'] = '*'
     return resp
 
@@ -80,7 +80,7 @@ def generateSessionKey():
 
 def addSessionKeyForUser(username):
     key = generateSessionKey()
-    sessionKeys[username] = key
+    sessionKeys[key] = username
     return key
 
 @app.route('/signup', methods=('GET', 'POST'))
@@ -124,8 +124,6 @@ def authRedirectToMain(username):
     resp.set_cookie('sessionkey', key)
     return resp, {"Refresh": "1; url=/"}
 
-   # return render_template('edit.html', post=post)
-
 
 @app.route('/tables', methods=['POST'])
 def getAvailableTables():
@@ -143,15 +141,54 @@ def getAvailableTables():
             time_end = request_data['time_end']
         else: abort(400)
     else: abort(400)
-    
-    query = 'SELECT * FROM entries WHERE (TimeStart NOT BETWEEN {} AND {}) AND (TimeEnd NOT BETWEEN {} AND {})'.format(time_start, time_end, time_start, time_end)
+
+    tableIDs = list()
+    query = 'SELECT * FROM entries WHERE ((TimeStart BETWEEN {} AND {}) OR (TimeEnd BETWEEN {} AND {}))'.format(time_start, time_end, time_start, time_end)
     print(query)
     conn = get_db_connection()
-    tables = conn.execute(query).fetchall()
+    tables = conn.execute('SELECT * FROM tables').fetchall()
+    entries = conn.execute(query).fetchall()
     conn.close()
-    parts = list()
-    for i in tables:
-        parts.append('"id":{}, "seats":{}'.format(i.ID, i.Seats))
-    concatenatedTables = ','.join(parts)
+    print(entries)
+    for i in list(tables):
+        tableIDs.append(i["ID"])
+    for i in list(entries):
+        tableIDs.remove(i["TableID"])
+    print(tableIDs)
+    concatenatedTables = ','.join(map(str, tableIDs))
     result = '[{}]'.format(concatenatedTables)
     return Response(result, status=200, mimetype='application/json')
+
+
+# POST: <ID-номер>
+@app.route('/delete', methods=['POST'])
+def delete():
+    success = True
+
+    request_data = request.get_data()
+    if not request_data: success = False
+    targetID = int(request_data)
+
+    userKey = request.cookies.get('sessionkey')
+    if userKey not in list(sessionKeys.keys()): success = False
+    currentUsername = sessionKeys[userKey]
+
+    conn = get_db_connection()
+    user = conn.execute('SELECT * FROM Users WHERE Username = ' + currentUsername).fetchone()
+    if user['IsAdmin'] == 1:
+        query = 'DELETE FROM Entries WHERE ID = {}'.format(targetID)
+    else:
+        query = 'DELETE FROM Entries WHERE ID = {} AND UsernameID = {}'.format(targetID, user['ID'])
+
+    try:
+        conn.execute(query)
+        conn.commit()
+        success = True
+    except IndexError:
+        success = False
+    conn.close()
+
+    if (success):
+        return Response('{"success": true}', status=200, mimetype='application/json')
+    else:
+        return Response('{"success": false}', status=400, mimetype='application/json')

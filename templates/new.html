@@ -1,15 +1,16 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename= 'css/style_new.css') }}">
 <div id="newEntry_container">
     <div id="newEntry_left">
         <h1>Столики</h1>
         <div id="newEntry_tableGrid">
-            <div class="newEntry_tableGridDecoration">
-                <div class="newEntry_tableGridDecorationInner"></div>
+            <div class="tableGridDecoration">
+                <div class="tableGridDecorationInner"></div>
             </div>
             {% for table in tables %}
-            <div class="newEntry_tableCard" data-tableid="{{ table['ID'] }}">
+            <div class="tableCard" data-tableid="{{ table['ID'] }}">
                 <h2>Столик {{ table['ID'] }}</h2>
                 <h3>Мест: {{ table['Seats'] }}</h3>
             </div>
@@ -18,7 +19,7 @@
         <h1>Кухни</h1>
         <div id="newEntry_cuisineList">
             {% for cuisine in cuisines %}
-            <div class="newEntry_cuisineCard">
+            <div class="cuisineCard" data-cuisineid="{{ cuisine['ID'] }}">
                 <h2>{{ cuisine['Name'] }}</h2>
                 <h3>{{ cuisine['Description'] }}</h3>
             </div>
@@ -26,7 +27,22 @@
         </div>
     </div>
     <div id="newEntry_right">
-        <input type="date" id="newEntry_dateInput" value="2023-07-04" min="2023-07-04" max="2023-08-04">
+        <div class="inputContainer">
+            <h4>Дата</h4>
+            <input type="date" id="dateInput" value="{{minDate}}" min="{{minDate}}" max="{{maxDate}}">
+        </div>
+        <div class="inputContainer">
+            <h4>Начало</h4>
+            <select name="timeInput_start" id="timeInput_start"></select>
+        </div>
+        <div class="timeInputContainer">
+            <h4>Окончание</h4>
+            <select name="timeInput_end" id="timeInput_end"></select>
+        </div>
+        <div class="timeInputContainer">
+            <h4>Кол-во человек</h4>
+            <input type="number" min="1" max="16" id="peopleCountInput"></input>
+        </div>
         <button id="newEntry_submitButton">Создать запись</button>
     </div>
 </div>

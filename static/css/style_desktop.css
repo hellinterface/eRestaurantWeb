@@ -41,83 +41,6 @@ header #headerAccountButton {
     height: 42px;
 }
 
-#entries_list {
-    display: flex;
-    gap: 16px;
-    padding: 32px;
-    box-sizing: border-box;
-}
-
-.entries_entryContainer {
-    background: #fff5ee;
-    border: solid 1px #ea6;
-    box-shadow: 0 2px 6px #0005;
-    width: 500px;
-    height: 250px;
-    border-radius: 6px;
-    box-sizing: border-box;
-    padding: 32px;
-    font-size: 1.5em;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    user-select: none;
-    transition: 0.2s ease;
-}
-
-.entries_entryContainer:hover {
-    background: #ffefe4;
-    border: solid 1px #e71;
-    box-shadow: 0 8px 12px #0004;
-}
-
-.entries_entryContainer .row {
-    display: flex;
-    justify-content: space-between;
-}
-
-.fab {
-    position: fixed;
-    bottom: 32px;
-    right: 32px;
-    height: 64px;
-    width: 64px;
-    background: var(--color_accent1);
-    border-radius: 6px;
-    box-shadow: 0 2px 6px #0005;
-    transition: 0.2s ease;
-}
-
-.fab:hover {
-    background: #f87140;
-    box-shadow: 0 8px 12px #0004;
-}
-
-.xSelect {
-    border: solid 1px grey;
-    border-radius: 6px;
-    width: 150px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    padding: 12px;
-    background-color: white;
-}
-
-.xSelect div {
-    border-radius: 6px;
-    background: #fff5ee;
-    min-height: 32px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    user-select: none;
-}
-
-.xSelect div.selected {
-    background: #f4c4a4;
-}
-
 button {
     background: var(--color_accent1);
     border: solid 1px #f87140;
@@ -129,97 +52,25 @@ button {
     padding: 8px 16px;
 }
 
-#newEntry_container {
+#accountMenu {
     display: flex;
-    width: 100%;
-    gap: 12px;
-}
-
-#newEntry_left {
-    flex-grow: 1;
-}
-
-#newEntry_right {
+    position: absolute;
+    right: 16px;
+    top: 72px;
+    z-index: 10;
+    background-color: white;
+    box-shadow: 0 4px 8px #0004;
+    border-radius: 6px;
+    width: 200px;
     padding: 16px;
-    background: #fff5ee;
-    width: 400px;
-    border-radius: 6px;
+    transition: 0.2s ease;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(20px);
 }
 
-#newEntry_tableGrid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    grid-template-rows: repeat(3, 1fr);
-    gap: 12px;
-}
-
-.newEntry_tableCard {
-    background: var(--color_bg1);
-    padding: 12px;
-    border-radius: 6px;
-}
-
-#newEntry_tableGrid .newEntry_tableCard[data-tableid="1"] {
-    grid-column: 1;
-    grid-row: 1;
-}
-#newEntry_tableGrid .newEntry_tableCard[data-tableid="2"] {
-    grid-column: 1;
-    grid-row: 2;
-}
-#newEntry_tableGrid .newEntry_tableCard[data-tableid="3"] {
-    grid-column: 2;
-    grid-row: 1;
-}
-#newEntry_tableGrid .newEntry_tableCard[data-tableid="4"] {
-    grid-column: 3;
-    grid-row: 1;
-}
-#newEntry_tableGrid .newEntry_tableCard[data-tableid="5"] {
-    grid-column: 4;
-    grid-row: 1;
-}
-#newEntry_tableGrid .newEntry_tableCard[data-tableid="6"] {
-    grid-column: 4;
-    grid-row: 2;
-}
-#newEntry_tableGrid .newEntry_tableCard[data-tableid="7"] {
-    grid-column: 4;
-    grid-row: 3;
-}
-#newEntry_tableGrid .newEntry_tableCard[data-tableid="8"] {
-    grid-column: 5;
-    grid-row: 1 / 4;
-}
-#newEntry_tableGrid .newEntry_tableGridDecoration {
-    grid-column: 2 / 4;
-    grid-row: 2 / 4;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-#newEntry_tableGrid .newEntry_tableGridDecoration .newEntry_tableGridDecorationInner {
-    background: var(--color_bg2);
-    width: calc(100% - 48px);
-    height: calc(100% - 48px);
-}
-
-#newEntry_cuisineList {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 16px;
-}
-
-.newEntry_cuisineCard {
-    display: flex;
-    background: var(--color_bg2);
-    padding: 16px;
-    border-radius: 6px;
-    flex-direction: column;
-    flex-grow: 1;
-}
-
-.newEntry_cuisineCard h3 {
-    white-space: pre-line;
+body.accountMenuVisible #accountMenu {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
 }
