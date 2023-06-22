@@ -4,13 +4,14 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    gap: 16px;
 }
 
 #userFormContainer {
-    width: 400px;
-    background: #eee;
+    background: var(--color_bg2);
     padding: 16px;
     border-radius: 6px;
+    width: 400px;
 }
 
 #userFormContainer form {
@@ -23,4 +24,25 @@ body {
     display: flex;
     flex-direction: column;
     gap: 8px;
+}
+
+#userFormContainer form label {
+    padding-left: 24px;
+    font-size: 18px;
+}
+
+input {
+    outline: none;
+    background-color: white;
+    border: solid 1px gray;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 18px;
+    color: black;
+}
+
+a {
+    color: #537bfc;
+    text-decoration: none;
+    font-size: 18px;
 }

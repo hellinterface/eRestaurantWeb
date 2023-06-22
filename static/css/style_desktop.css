@@ -1,19 +1,26 @@
 
 * {
-    --color_bg2: #fff5ee;
-    --color_bg1: #ffeddf;
-    --color_accent1: coral;
+    --color_bg2: #eef4ff;
+    --color_bg1: #dfecff;
+    --color_accent1: #335ccf;
+    --color_accent2: #466fe1;
 }
 
 html {
-    height: 100%;
+    height: 100vh;
+    width: 100vw;
+    min-height: 100vh;
+    min-width: 100vw;
 }
 
 body {
     margin: 0;
     height: 100%;
-    font-family: 'Trebuchet MS';
+    width: 100%;
+    font-family: 'Segoe UI';
     font-size: 1.3em;
+    position: relative;
+    overflow: auto;
 }
 
 header {
@@ -25,13 +32,21 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    position: sticky;
+    top: 0;
 }
 
 header #headerLogo {
     color: var(--color_accent1);
     font-weight: bold;
-    font-family: 'Trebuchet MS';
+    font-family: 'Segoe UI';
     font-size: 1.6em;
+}
+
+header #headerLogo a {
+    user-select: none;
+    text-decoration: none;
+    color: var(--color_accent1);
 }
 
 header #headerAccountButton {
@@ -39,22 +54,38 @@ header #headerAccountButton {
     background: var(--color_accent1);
     width: 42px;
     height: 42px;
+    box-shadow: 0 1px 2px #0005;
+    transition: 0.2s ease;
+}
+
+header #headerAccountButton:hover {
+    box-shadow: 0 4px 8px #0004;
 }
 
 button {
     background: var(--color_accent1);
-    border: solid 1px #f87140;
+    border: solid 1px var(--color_accent1);
     border-radius: 6px;
     min-height: 32px;
-    font-family: 'Trebuchet MS';
-    color: #45270e;
-    font-size: 0.8em;
-    padding: 8px 16px;
+    font-family: 'Segoe UI';
+    color: #fff;
+    padding: 8px 24px;
+    font-size: 20px;
+    font-weight: 500;
+    box-shadow: 0 1px 2px #0005;
+    transition: 0.2s ease;
+}
+
+button:hover {
+    background: var(--color_accent2);
+    box-shadow: 0 4px 8px #0004;
 }
 
 #accountMenu {
     display: flex;
-    position: absolute;
+    flex-direction: column;
+    gap: 16px;
+    position: fixed;
     right: 16px;
     top: 72px;
     z-index: 10;

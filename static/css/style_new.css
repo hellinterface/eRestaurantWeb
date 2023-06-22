@@ -1,48 +1,66 @@
 
-.xSelect {
-    border: solid 1px grey;
-    border-radius: 6px;
-    width: 150px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    padding: 12px;
-    background-color: white;
-    max-height: 300px;
-    overflow: auto;
+@media (max-width: 1100px) {
+    #newEntry_container {
+        flex-direction: column-reverse;
+        width: auto;
+        overflow: auto !important;
+    }
+    #newEntry_right {
+        width: 100% !important;
+        height: fit-content !important;
+    }
+    #newEntry_left {
+        width: 100% !important;
+        height: fit-content !important;
+    }
 }
 
-.xSelect div {
-    border-radius: 6px;
-    background: #fff5ee;
-    min-height: 32px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    user-select: none;
+@media (max-width: 900px) {
+    #newEntry_tableGrid {
+        display: flex !important;
+        flex-direction: column;
+    }
+    .tableGridDecoration {
+        display: none;
+    }
 }
 
-.xSelect div.selected {
-    background: #f4c4a4;
+#mainContent {
+    height: calc(100% - 64px);
 }
-
 
 #newEntry_container {
     display: flex;
     width: 100%;
     gap: 12px;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 16px;
+    overflow: hidden;
 }
 
 #newEntry_left {
     flex-grow: 1;
+    height: 100%;
+    box-sizing: border-box;
+    overflow: auto;
 }
 
 #newEntry_right {
     padding: 16px;
-    background: #fff5ee;
+    background: var(--color_bg2);
     width: 300px;
     border-radius: 6px;
     flex-shrink: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+#newEntry_right button {
+    width: 100%;
 }
 
 #newEntry_tableGrid {
@@ -149,10 +167,15 @@
 
 input, select {
     padding: 16px;
-    font-size: 16px;
+    font-size: 18px;
     border-radius: 6px;
     background: white;
     border: solid 1px grey;
     outline: none;
     color: black;
+    font-family: "Segoe UI";
+}
+
+#newEntry_right h4 {
+    margin: 8px;
 }
