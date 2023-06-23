@@ -7,19 +7,19 @@
     <div class="entries_entryContainer" data-timestart="{{ entry['TimeStart'] }}" data-timeend="{{ entry['TimeEnd'] }}" >
         <div class="row">
             <div>Дата</div>
-            <div class="entries_entryDate">{{ entry['TimeStart'] }} - {{ entry['TimeEnd'] }}</div>
+            <div class="entries_entryDate"></div>
         </div>
         <div class="row">
             <div>Время</div>
-            <div class="entries_entryTime">{{ entry['TimeStart'] }} - {{ entry['TimeEnd'] }}</div>
+            <div class="entries_entryTime"></div>
         </div>
         <div class="row">
             <div>Место</div>
             <div class="entries_entryTable">Столик {{ entry['TableID'] }} ({{ entry['PeopleCount'] }} чел.)</div>
         </div>
         <div class="row">
-            <button>Изменить</button>
-            <button>Удалить</button>
+            <a href="/edit?entryID={{entry['ID']}}" class="buttonLink">Изменить</a>
+            <button onclick="deleteEntry({{entry['ID']}})">Удалить</button>
         </div>
     </div>
     {% endfor %}
