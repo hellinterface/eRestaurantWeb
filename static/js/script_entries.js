@@ -9,3 +9,20 @@ for (let card of entryCards) {
     card.querySelector('.entries_entryDate').innerText = `${timeStart.getFullYear()}.${timeStart.getMonth()}.${timeStart.getDate()}`;
     card.querySelector('.entries_entryTime').innerText = `${timeStart.getHours()}:00 - ${timeEnd.getHours()}:00`;
 }
+
+function deleteEntry(entryID) {
+    (async () => {
+        const rawResponse = await fetch('/delete', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: entryID
+        });
+        const content = await rawResponse.json();
+      
+        console.log(content);
+        
+      })();
+}

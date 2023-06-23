@@ -78,6 +78,11 @@
     user-select: none;
 }
 
+.tableCard[disabled="true"] {
+    background: #ddd;
+    pointer-events: none;
+}
+
 .tableCard:hover {
     background: var(--color_bg2);
     box-shadow: 0 4px 8px #0004;
@@ -179,3 +184,4 @@ input, select {
 #newEntry_right h4 {
     margin: 8px;
 }
+

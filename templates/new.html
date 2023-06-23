@@ -2,6 +2,19 @@
 
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename= 'css/style_new.css') }}">
+{% if editEntry != None %}
+    {% block code %}
+        <script>var editEntry = {
+            id: {{editEntry['ID']}},
+            user_id: {{editEntry['UsernameID']}},
+            time_start: {{editEntry['TimeStart']}},
+            time_end: {{editEntry['TimeEnd']}},
+            people_count: {{editEntry['PeopleCount']}},
+            table_id: {{editEntry['TableID']}},
+            cuisine_ids: {{editEntry['CuisineIDs']}}
+        };</script>
+    {% endblock code %}
+{% endif %}
 <div id="newEntry_container">
     <div id="newEntry_left">
         <h1>Столики</h1>
@@ -10,7 +23,13 @@
                 <div class="tableGridDecorationInner"></div>
             </div>
             {% for table in tables %}
-            <div class="tableCard" data-tableid="{{ table['ID'] }}">
+            <div class="tableCard 
+            {% if editEntry != None and table['ID'] == editEntry['TableID'] %}
+                {% block sel %}
+                    selected
+                {% endblock sel %}
+            {% endif %}"
+            data-tableid="{{ table['ID'] }}">
                 <h2>Столик {{ table['ID'] }}</h2>
                 <h3>Мест: {{ table['Seats'] }}</h3>
             </div>
@@ -41,8 +60,16 @@
         </div>
         <div class="inputContainer">
             <h4>Кол-во человек</h4>
-            <input type="number" min="1" max="16" id="peopleCountInput"></input>
+            <input type="number" min="1" max="16" value="1" id="peopleCountInput"></input>
         </div>
+        {% if isAdmin == 1 and editEntry == None %}
+            {% block usernameinput %}
+                <div class="inputContainer">
+                    <h4>Имя пользователя (админ.)</h4>
+                    <input type="text" id="adminUsernameInput">
+                </div>
+            {% endblock usernameinput %}
+        {% endif %}
         <button id="newEntry_submitButton">Создать запись</button>
     </div>
 </div>

@@ -25,12 +25,15 @@ def root():
     currentUsername = sessionKeys[userKey]
 
     conn = get_db_connection()
-    user = conn.execute('SELECT * FROM Users WHERE Username = ' + currentUsername).fetchone()
-    entries = conn.execute('SELECT * FROM entries WHERE UsernameID = ' + str(user['ID'])).fetchall()
+    user = conn.execute(f'SELECT * FROM Users WHERE Username = "{currentUsername}"').fetchone()
+    entries = ""
+    if user['IsAdmin'] == 1:
+        entries = conn.execute(f'SELECT * FROM entries').fetchall()
+    else:
+        entries = conn.execute(f'SELECT * FROM entries WHERE UsernameID = ' + str(user['ID'])).fetchall()
     conn.close()
     namesurname = user['Name'] + " " + user['Surname']
     resp = make_response(render_template('entries.html', namesurname=namesurname, entries=entries))
-    # resp.headers['AuthKey'] = '*'
     return resp
 
 
@@ -44,15 +47,14 @@ def new():
     currentUsername = sessionKeys[userKey]
 
     conn = get_db_connection()
-    user = conn.execute('SELECT * FROM Users WHERE Username = ' + currentUsername).fetchone()
+    user = conn.execute(f'SELECT * FROM Users WHERE Username = "{currentUsername}"').fetchone()
     tables = conn.execute('SELECT * FROM tables').fetchall()
     cuisines = conn.execute('SELECT * FROM cuisines').fetchall()
     conn.close()
     namesurname = user['Name'] + " " + user['Surname']
     minDate = datetime.today().strftime('%Y-%m-%d')
     maxDate = (datetime.today() + relativedelta(months=1)).strftime('%Y-%m-%d')
-    resp = make_response(render_template('new.html', namesurname=namesurname, tables=tables, cuisines=cuisines, minDate=minDate, maxDate=maxDate))
-    # resp.headers['AuthKey'] = '*'
+    resp = make_response(render_template('new.html', editEntry=None, namesurname=namesurname, tables=tables, cuisines=cuisines, minDate=minDate, maxDate=maxDate, isAdmin = user['isAdmin']))
     return resp
 
 @app.route('/login', methods=('GET', 'POST'))
@@ -124,6 +126,16 @@ def authRedirectToMain(username):
     resp.set_cookie('sessionkey', key)
     return resp, {"Refresh": "1; url=/"}
 
+@app.route('/unauth', methods=['GET'])
+def unauth():
+    userKey = request.cookies.get('sessionkey')
+    if userKey not in list(sessionKeys.keys()) :
+        return redirect('/login')
+    del sessionKeys[userKey]
+    resp = make_response(render_template('auth.html'))
+    resp.set_cookie('sessionkey', '')
+    return resp, {"Refresh": "1; url=/login"}
+
 
 @app.route('/tables', methods=['POST'])
 def getAvailableTables():
@@ -131,6 +143,7 @@ def getAvailableTables():
     
     time_start = None
     time_end = None
+    people_count = None
 
     if request_data:
         if 'time_start' in request_data:
@@ -140,13 +153,17 @@ def getAvailableTables():
         if 'time_end' in request_data:
             time_end = request_data['time_end']
         else: abort(400)
+
+        if 'people_count' in request_data:
+            people_count = request_data['people_count']
+        else: abort(400)
     else: abort(400)
 
     tableIDs = list()
     query = 'SELECT * FROM entries WHERE ((TimeStart BETWEEN {} AND {}) OR (TimeEnd BETWEEN {} AND {}))'.format(time_start, time_end, time_start, time_end)
     print(query)
     conn = get_db_connection()
-    tables = conn.execute('SELECT * FROM tables').fetchall()
+    tables = conn.execute('SELECT * FROM tables WHERE Seats >= {}'.format(people_count)).fetchall()
     entries = conn.execute(query).fetchall()
     conn.close()
     print(entries)
@@ -174,7 +191,7 @@ def delete():
     currentUsername = sessionKeys[userKey]
 
     conn = get_db_connection()
-    user = conn.execute('SELECT * FROM Users WHERE Username = ' + currentUsername).fetchone()
+    user = conn.execute(f'SELECT * FROM Users WHERE Username = "{currentUsername}"').fetchone()
     if user['IsAdmin'] == 1:
         query = 'DELETE FROM Entries WHERE ID = {}'.format(targetID)
     else:
@@ -192,3 +209,107 @@ def delete():
         return Response('{"success": true}', status=200, mimetype='application/json')
     else:
         return Response('{"success": false}', status=400, mimetype='application/json')
+
+
+@app.route('/apply', methods=['POST'])
+def apply():
+    success = True
+    request_data = request.get_json()
+    time_start = None
+    time_end = None
+    people_count = None
+    table_id = None
+    cuisine_ids = None
+    id = None
+    for_username = None
+
+    if request_data:
+        if 'time_start' in request_data:
+            time_start = request_data['time_start']
+        else: abort(400)
+
+        if 'time_end' in request_data:
+            time_end = request_data['time_end']
+        else: abort(400)
+
+        if 'people_count' in request_data:
+            people_count = request_data['people_count']
+        else: abort(400)
+
+        if 'table_id' in request_data:
+            table_id = request_data['table_id']
+        else: abort(400)
+
+        if 'cuisine_ids' in request_data:
+            cuisine_ids = request_data['cuisine_ids']
+        else: abort(400)
+
+        if 'id' in request_data:
+            id = request_data['id']
+
+        if 'for_username' in request_data:
+            for_username = request_data['for_username']
+
+    else: abort(400)
+
+    userKey = request.cookies.get('sessionkey')
+    if userKey not in list(sessionKeys.keys()): success = False
+    currentUsername = sessionKeys[userKey]
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    user = ""
+    if (for_username == None): user = conn.execute('SELECT * FROM Users WHERE Username = ' + currentUsername).fetchone()
+    else: user = conn.execute('SELECT * FROM Users WHERE Username = ' + for_username).fetchone()
+    maxid = conn.execute("SELECT MAX(ID) FROM Entries").fetchone()
+    maxid = maxid['MAX(ID)']
+    print(maxid)
+    # names = list(map(lambda x: x[0], maxid.description))
+    # print(names)
+    if (id == None): # СОЗДАНИЕ
+        query = f"INSERT INTO Entries VALUES ({maxid+1}, {user['ID']}, {time_start}, {time_end}, {table_id}, {people_count}, '{cuisine_ids}')"
+    else: # ИЗМЕНЕНИЕ
+        query = f"UPDATE Entries SET TimeStart = {time_start}, TimeEnd = {time_end}, TableID = {table_id}, PeopleCount = {people_count}, CuisineIDs = '{cuisine_ids}' WHERE ID = {id}"
+    #cursor.execute(query)
+
+    try:
+        conn.execute(query)
+        conn.commit()
+        success = True
+    except IndexError:
+        success = False
+    conn.close()
+
+    if (success):
+        return Response('{"success": true}', status=200, mimetype='application/json')
+    else:
+        return Response('{"success": false}', status=400, mimetype='application/json')
+
+@app.route('/edit', methods=['GET'])
+def edit():
+    targetID = request.args.get('entryID')
+    print(targetID)
+    
+    userKey = request.cookies.get('sessionkey')
+    if userKey not in list(sessionKeys.keys()) :
+        return redirect('/login')
+    currentUsername = sessionKeys[userKey]
+
+    conn = get_db_connection()
+    # cur = conn.cursor()
+    # entryExists = cur.execute('SELECT EXISTS(SELECT 1 FROM Entries WHERE ID = {})'.format(targetID)).fetchone()
+    # print(entryExists)
+    user = conn.execute('SELECT * FROM Users WHERE Username = ' + currentUsername).fetchone()
+    if user['IsAdmin'] == 1:
+        query = 'SELECT * FROM Entries WHERE ID = {}'.format(targetID)
+    else:
+        query = 'SELECT * FROM Entries WHERE ID = {} AND UsernameID = {}'.format(targetID, user['ID'])
+    print(user['ID'])
+    editEntry = conn.execute(query).fetchone()
+    tables = conn.execute('SELECT * FROM tables').fetchall()
+    cuisines = conn.execute('SELECT * FROM cuisines').fetchall()
+    conn.close()
+    namesurname = user['Name'] + " " + user['Surname']
+    print(editEntry['TableID'])
+    resp = make_response(render_template('new.html', namesurname=namesurname, editEntry=editEntry, cuisines=cuisines, tables=tables, isAdmin = user['isAdmin']))
+    return resp

@@ -62,7 +62,7 @@ header #headerAccountButton:hover {
     box-shadow: 0 4px 8px #0004;
 }
 
-button {
+button, .buttonLink {
     background: var(--color_accent1);
     border: solid 1px var(--color_accent1);
     border-radius: 6px;
@@ -76,7 +76,7 @@ button {
     transition: 0.2s ease;
 }
 
-button:hover {
+button:hover, .buttonLink:hover {
     background: var(--color_accent2);
     box-shadow: 0 4px 8px #0004;
 }
