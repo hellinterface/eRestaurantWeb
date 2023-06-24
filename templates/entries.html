@@ -18,6 +18,10 @@
             <div class="entries_entryTable">Столик {{ entry['TableID'] }} ({{ entry['PeopleCount'] }} чел.)</div>
         </div>
         <div class="row">
+            <div>Кухни</div>
+            <div class="entries_entryTable">{{ entry['CuisineIDs'] }}</div>
+        </div>
+        <div class="row">
             <a href="/edit?entryID={{entry['ID']}}" class="buttonLink">Изменить</a>
             <button onclick="deleteEntry({{entry['ID']}})">Удалить</button>
         </div>
