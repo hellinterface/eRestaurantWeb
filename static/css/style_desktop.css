@@ -74,6 +74,7 @@ button, .buttonLink {
     font-weight: 500;
     box-shadow: 0 1px 2px #0005;
     transition: 0.2s ease;
+    text-decoration: none;
 }
 
 button:hover, .buttonLink:hover {

@@ -70,7 +70,12 @@
                 </div>
             {% endblock usernameinput %}
         {% endif %}
-        <button id="newEntry_submitButton">Создать запись</button>
+        {% if isAdmin == 1 and editEntry != None %}
+            {% block username %}
+                <div>Редактирование записи для пользователя с ID: {{editEntry['UsernameID']}}</div>
+            {% endblock username %}
+        {% endif %}
+        <button id="newEntry_submitButton">ОК</button>
     </div>
 </div>
 <script src="{{ url_for('static', filename= 'js/script_new.js') }}"></script>

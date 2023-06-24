@@ -8,6 +8,7 @@ from dateutil.relativedelta import relativedelta
 # ключ: имя пользователя
 sessionKeys = dict()
 
+# подключение к базе данных
 def get_db_connection():
     conn = sqlite3.connect('main.db')
     conn.row_factory = sqlite3.Row
@@ -15,6 +16,7 @@ def get_db_connection():
 
 app = Flask("eRestaurantWeb")
 
+# страница с перечислением записей
 @app.route('/')
 def root():
     userKey = request.cookies.get('sessionkey')
@@ -52,11 +54,12 @@ def new():
     cuisines = conn.execute('SELECT * FROM cuisines').fetchall()
     conn.close()
     namesurname = user['Name'] + " " + user['Surname']
-    minDate = datetime.today().strftime('%Y-%m-%d')
-    maxDate = (datetime.today() + relativedelta(months=1)).strftime('%Y-%m-%d')
+    minDate = (datetime.today() + relativedelta(days=1)).strftime('%Y-%m-%d') # время минимальное
+    maxDate = (datetime.today() + relativedelta(days=1) + relativedelta(months=1)).strftime('%Y-%m-%d') # время максимальное (один месяц спустя )
     resp = make_response(render_template('new.html', editEntry=None, namesurname=namesurname, tables=tables, cuisines=cuisines, minDate=minDate, maxDate=maxDate, isAdmin = user['isAdmin']))
     return resp
 
+# вход в аккаунт
 @app.route('/login', methods=('GET', 'POST'))
 def login():
     if request.method == 'POST':
@@ -77,14 +80,17 @@ def login():
 def page_not_found(error):
     return "INVALID 400"
 
+# генерация ключа сессии
 def generateSessionKey():
     return ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(10))
 
+# ассоциация ключа сессии и пользователя в словаре sessionKeys
 def addSessionKeyForUser(username):
     key = generateSessionKey()
     sessionKeys[key] = username
     return key
 
+# регистрация
 @app.route('/signup', methods=('GET', 'POST'))
 def signup():
     if request.method == 'POST':
@@ -117,7 +123,7 @@ def signup():
         return render_template('signup.html', error=False)
 
 
-# @app.route('/auth', methods=('GET'))
+# дать куки с ключом сессии и перевести пользователя на главную страницу
 def authRedirectToMain(username):
     key = addSessionKeyForUser(username)
     # key = sessionKeys[username]
@@ -126,6 +132,7 @@ def authRedirectToMain(username):
     resp.set_cookie('sessionkey', key)
     return resp, {"Refresh": "1; url=/"}
 
+# выход из аккаунта
 @app.route('/unauth', methods=['GET'])
 def unauth():
     userKey = request.cookies.get('sessionkey')
@@ -136,7 +143,7 @@ def unauth():
     resp.set_cookie('sessionkey', '')
     return resp, {"Refresh": "1; url=/login"}
 
-
+# получение доступных столиков
 @app.route('/tables', methods=['POST'])
 def getAvailableTables():
     request_data = request.get_json()
@@ -176,7 +183,7 @@ def getAvailableTables():
     result = '[{}]'.format(concatenatedTables)
     return Response(result, status=200, mimetype='application/json')
 
-
+# удаление записи с указанным айди
 # POST: <ID-номер>
 @app.route('/delete', methods=['POST'])
 def delete():
@@ -210,7 +217,7 @@ def delete():
     else:
         return Response('{"success": false}', status=400, mimetype='application/json')
 
-
+# занесение изменений в базу данных
 @app.route('/apply', methods=['POST'])
 def apply():
     success = True
@@ -259,32 +266,33 @@ def apply():
     conn = get_db_connection()
     cursor = conn.cursor()
     user = ""
-    if (for_username == None): user = conn.execute('SELECT * FROM Users WHERE Username = ' + currentUsername).fetchone()
-    else: user = conn.execute('SELECT * FROM Users WHERE Username = ' + for_username).fetchone()
-    maxid = conn.execute("SELECT MAX(ID) FROM Entries").fetchone()
-    maxid = maxid['MAX(ID)']
-    print(maxid)
-    # names = list(map(lambda x: x[0], maxid.description))
-    # print(names)
-    if (id == None): # СОЗДАНИЕ
-        query = f"INSERT INTO Entries VALUES ({maxid+1}, {user['ID']}, {time_start}, {time_end}, {table_id}, {people_count}, '{cuisine_ids}')"
-    else: # ИЗМЕНЕНИЕ
-        query = f"UPDATE Entries SET TimeStart = {time_start}, TimeEnd = {time_end}, TableID = {table_id}, PeopleCount = {people_count}, CuisineIDs = '{cuisine_ids}' WHERE ID = {id}"
-    #cursor.execute(query)
+    if (for_username == None): user = conn.execute(f'SELECT * FROM Users WHERE Username = "{currentUsername}"').fetchone()
+    else: user = conn.execute(f'SELECT * FROM Users WHERE Username = "{for_username}"').fetchone()
+    if (user == None): success = False
+    else:
+        maxid = conn.execute("SELECT MAX(ID) FROM Entries").fetchone()
+        maxid = maxid['MAX(ID)']
+        print(maxid)
+        if (id == None): # СОЗДАНИЕ
+            query = f"INSERT INTO Entries VALUES ({maxid+1}, {user['ID']}, {time_start}, {time_end}, {table_id}, {people_count}, '{cuisine_ids}')"
+        else: # ИЗМЕНЕНИЕ
+            query = f"UPDATE Entries SET TimeStart = {time_start}, TimeEnd = {time_end}, TableID = {table_id}, PeopleCount = {people_count}, CuisineIDs = '{cuisine_ids}' WHERE ID = {id}"
+        #cursor.execute(query)
 
-    try:
-        conn.execute(query)
-        conn.commit()
-        success = True
-    except IndexError:
-        success = False
-    conn.close()
+        try:
+            conn.execute(query)
+            conn.commit()
+            success = True
+        except IndexError:
+            success = False
+        conn.close()
 
     if (success):
         return Response('{"success": true}', status=200, mimetype='application/json')
     else:
         return Response('{"success": false}', status=400, mimetype='application/json')
 
+# редактирование записи (открывает страницу создания новой с заполненными полями)
 @app.route('/edit', methods=['GET'])
 def edit():
     targetID = request.args.get('entryID')
@@ -299,17 +307,19 @@ def edit():
     # cur = conn.cursor()
     # entryExists = cur.execute('SELECT EXISTS(SELECT 1 FROM Entries WHERE ID = {})'.format(targetID)).fetchone()
     # print(entryExists)
-    user = conn.execute('SELECT * FROM Users WHERE Username = ' + currentUsername).fetchone()
+    user = conn.execute(f'SELECT * FROM Users WHERE Username = "{currentUsername}"').fetchone()
     if user['IsAdmin'] == 1:
         query = 'SELECT * FROM Entries WHERE ID = {}'.format(targetID)
     else:
         query = 'SELECT * FROM Entries WHERE ID = {} AND UsernameID = {}'.format(targetID, user['ID'])
-    print(user['ID'])
+    print('------------------------------------------')
+    print(user['IsAdmin'])
+    print('------------------------------------------')
     editEntry = conn.execute(query).fetchone()
     tables = conn.execute('SELECT * FROM tables').fetchall()
     cuisines = conn.execute('SELECT * FROM cuisines').fetchall()
     conn.close()
     namesurname = user['Name'] + " " + user['Surname']
     print(editEntry['TableID'])
-    resp = make_response(render_template('new.html', namesurname=namesurname, editEntry=editEntry, cuisines=cuisines, tables=tables, isAdmin = user['isAdmin']))
+    resp = make_response(render_template('new.html', namesurname=namesurname, editEntry=editEntry, cuisines=cuisines, tables=tables, isAdmin = user['IsAdmin']))
     return resp

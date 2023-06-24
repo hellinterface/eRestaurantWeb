@@ -4,7 +4,7 @@
 <link rel="stylesheet" href="{{ url_for('static', filename= 'css/style_entries.css') }}">
 <div id="entries_list">
     {% for entry in entries %}
-    <div class="entries_entryContainer" data-timestart="{{ entry['TimeStart'] }}" data-timeend="{{ entry['TimeEnd'] }}" >
+    <div class="entries_entryContainer" entryID="{{entry['ID']}}" data-timestart="{{ entry['TimeStart'] }}" data-timeend="{{ entry['TimeEnd'] }}" >
         <div class="row">
             <div>Дата</div>
             <div class="entries_entryDate"></div>

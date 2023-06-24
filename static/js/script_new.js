@@ -1,6 +1,7 @@
 
 "use strict";
 
+// заполнение элемента селект времени начала
 let timeOptions_start = [];
 let tempString = "";
 for (let i = 11; i <= 22; i++) {
@@ -9,6 +10,7 @@ for (let i = 11; i <= 22; i++) {
 }
 timeInput_start.innerHTML = tempString;
 
+// заполнение элемента селект времени конца
 let timeOptions_end = [];
 tempString = "";
 for (let i = 12; i <= 23; i++) {
@@ -17,6 +19,7 @@ for (let i = 12; i <= 23; i++) {
 }
 timeInput_end.innerHTML = tempString;
 
+// обновление доступных опций в селекте времени конца
 function updateTimeEndOptions() {
     if (timeInput_end.options.selectedIndex <= timeInput_start.options.selectedIndex) {
         timeInput_end.options.selectedIndex = timeInput_start.options.selectedIndex;
@@ -27,15 +30,25 @@ function updateTimeEndOptions() {
     }
 }
 
+// проверка свободныъ столиков
 function checkTables() {
+    // проверка на корректность полей
+    if (timeInput_start.checkValidity() == false) return;
+    if (timeInput_end.checkValidity() == false) return;
+    if (peopleCountInput.checkValidity() == false) return;
+
+    // время начала
     let timeStart = new Date(dateInput.value + " " + timeInput_start.value);
     console.log(timeStart);
     timeStart = Math.floor(timeStart.getTime() / 1000);
+    // время конца
     let timeEnd = new Date(dateInput.value + " " + timeInput_end.value);
     console.log(timeEnd);
     timeEnd = Math.floor(timeEnd.getTime() / 1000);
+    // число людей
     let peopleCount = parseInt(peopleCountInput.value);
     let jsonString = JSON.stringify({time_start: timeStart, time_end: timeEnd, people_count: peopleCount});
+    // отправление объекта
     (async () => {
         const rawResponse = await fetch('/tables', {
           method: 'POST',
@@ -47,6 +60,7 @@ function checkTables() {
         });
         const content = await rawResponse.json();
       
+        // получение ответа
         console.log(content);
         console.log(tableCards);
         for (let i of tableCards) {
@@ -64,22 +78,33 @@ function checkTables() {
       })();
 }
 
+// отправка финальной записи
 function submit() {
+    // проверка полей на корректность
+    if (timeInput_start.checkValidity() == false) return;
+    if (timeInput_end.checkValidity() == false) return;
+    if (peopleCountInput.checkValidity() == false) return;
+
+    // время начала
     let timeStart = new Date(dateInput.value + " " + timeInput_start.value);
     timeStart = Math.floor(timeStart.getTime() / 1000);
+    // время конца
     let timeEnd = new Date(dateInput.value + " " + timeInput_end.value);
     timeEnd = Math.floor(timeEnd.getTime() / 1000);
+    // число людей
     let peopleCount = parseInt(peopleCountInput.value);
-    if (peopleCountInput.checkValidity() == false) return;
     
+    // создание массива с выбранными кухнями
     let cuisines = [];
     document.querySelectorAll('.cuisineCard.selected').forEach(element => {
         cuisines.push(parseInt(element.getAttribute('data-cuisineid')));
     });
     console.log(cuisines);
+    // выбранный столик
     let selectedTableElement = document.querySelector('.tableCard.selected');
     let selectedTable = parseInt(selectedTableElement.getAttribute('data-tableid'));
 
+    // объект для отправки
     let objectToSend = {
         time_start: timeStart, 
         time_end: timeEnd, 
@@ -90,11 +115,15 @@ function submit() {
     
     let editEntryID = new URLSearchParams(window.location.search).get("entryID");
     let admin_usernameInput = document.getElementById("adminUsernameInput");
-    if (window.location.pathname == "/edit" && editEntry) {
+    if (window.location.pathname == "/edit" && editEntry) { // идёт редактирование, пользователь не админ
         objectToSend.id = editEntryID;
     }
-    if (admin_usernameInput) objectToSend.for_username = admin_usernameInput.value;
+    if (admin_usernameInput) { // идёт редактирование, пользователь админ
+        if (admin_usernameInput.checkValidity() == false) return;
+        objectToSend.for_username = admin_usernameInput.value;
+    }
     
+    // отправление запроса
     (async () => {
         const rawResponse = await fetch('/apply', {
             method: 'POST',
@@ -107,6 +136,7 @@ function submit() {
         const content = await rawResponse.text();
       
         console.log(content);
+        window.location.href = "/";
       })();
 }
 
